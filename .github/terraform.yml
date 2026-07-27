@@ -1,0 +1,14 @@
+name: My First Workflow
+
+on:
+  push:
+    branches:
+      - feature/vm
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print message
+        run: echo "Hello from GitHub Actions!"
