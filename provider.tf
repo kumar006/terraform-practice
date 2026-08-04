@@ -17,12 +17,12 @@ terraform {
   # }
 
   
-  backend "azurerm" {
-    resource_group_name  = "rg-table"
-    storage_account_name = "table1494"
-    container_name       = "new-file-container"
-    key                  = "backend.terraform.tfstate"
-  }
+  # backend "azurerm" {
+  #   resource_group_name  = "rg-table"
+  #   storage_account_name = "table1494"
+  #   container_name       = "new-file-container"
+  #   key                  = "backend.terraform.tfstate"
+  # }
 }
 
 # Configure the Microsoft Azure Provider
