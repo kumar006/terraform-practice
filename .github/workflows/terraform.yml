@@ -7,10 +7,10 @@ on:
   pull_request:
     branches:
       - main
-  
+
 permissions:
-    contents: read
-    security-events: write    
+  contents: read
+  security-events: write
 
 jobs:
   terraform:
@@ -30,21 +30,29 @@ jobs:
       - name: Terraform Version
         run: terraform version
 
+      - name: Create reports directory
+        run: mkdir -p reports
+
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
         with:
-         directory: .
-         framework: terraform
-         output_format: sarif
-         output_file_path: reports/results.sarif
+          directory: .
+          framework: terraform
+          output_format: sarif
+          output_file_path: reports/results.sarif
+
+      - name: Check SARIF file
+        run: |
+          ls -la reports
+          head -c 500 reports/results.sarif
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-         sarif_file: reports/results.sarif
+          sarif_file: reports/results.sarif
 
       - name: Terraform Format Check
-        run: terraform fmt
+        run: terraform fmt -check
 
       - name: Terraform Init
         run: terraform init
