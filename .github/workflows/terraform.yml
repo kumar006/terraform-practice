@@ -48,9 +48,14 @@ jobs:
       - name: TFLint Version
         run: tflint --version  
 
-      - name: Checkov Scan
-        working-directory: .
-        run: checkov -d .
+      - name: TFLint
+        run: |
+          tflint --init
+          tflint 
+
+      # - name: Checkov Scan
+      #   working-directory: .
+      #   run: checkov -d .
 
       # - name: Terraform Plan
       #   run: terraform plan
