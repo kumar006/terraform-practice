@@ -42,5 +42,9 @@ jobs:
       - name: Checkov Version
         run: checkov --version  
 
+      - name: Checkov Scan
+        working-directory: .
+        run: checkov -d .
+
       # - name: Terraform Plan
       #   run: terraform plan
