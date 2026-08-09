@@ -15,8 +15,9 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: environments/preprod
 
-    steps:
+    steps:                        # GitHub Actions runner/temporary machine par tumhara GitHub repository ka code download/checkout karo.
       - name: Checkout Repository
         uses: actions/checkout@v4
 
