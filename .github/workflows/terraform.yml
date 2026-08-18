@@ -1,61 +1,119 @@
-name: Terraform CI
+name: Terraform Azure Deployment
 
 on:
   push:
     branches:
-      - feature-branch
+      - 'feature**'
+      - main
+
   pull_request:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
 jobs:
-  terraform:
+
+  terraform-plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        shell: bash
-        working-directory: environments/preprod
+        working-directory: ./Environment/Prod
 
-    steps:                        # GitHub Actions runner/temporary machine par tumhara GitHub repository ka code download/checkout karo.
+    steps:
+
+      # Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Terraform
+      # Setup Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
 
-      - name: Terraform Version
-        run: terraform version
+      # Azure OIDC Login
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Terraform Format Check
-        run: terraform fmt -check
-
+      # Terraform Init
       - name: Terraform Init
         run: terraform init
 
+      # Terraform Format
+      - name: Terraform Format Check
+        run: terraform fmt
+
+      # Terraform Validate
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Install Checkov
-        run: pip install checkov  
+      # Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      - name: Checkov Version
-        run: checkov --version  
+      # Upload Plan
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: ./Environment/Prod/tfplan
 
-      - name: Install TFLint
-        uses: terraform-linters/setup-tflint@v5
 
-      - name: TFLint Version
-        run: tflint --version  
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
 
-      - name: TFLint
-        run: |
-          tflint --init
-          tflint 
+    # Apply only after code is merged/pushed to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-      # - name: Checkov Scan
-      #   working-directory: .
-      #   run: checkov -d .
+    needs:
+      - terraform-plan
 
-      # - name: Terraform Plan
-      #   run: terraform plan
+    defaults:
+      run:
+        working-directory: ./Environment/Prod
+
+    steps:
+
+      # Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      # Azure OIDC Login
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Terraform Init
+      - name: Terraform Init
+        run: terraform init
+
+      # Download Terraform Plan
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+          path: ./Environment/Prod
+
+      # Terraform Apply
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
