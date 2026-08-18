@@ -51,7 +51,7 @@ nics = {
 
 vms = {
   vm1 = {
-    vm_name             = "dhondhu-frontend-vm"
+    vm_name             = "dhondhu-frontend-vm3"
     location            = "centralindia"
     resource_group_name = "rg-dhondhu"
     size                = "Standard_D2ads_v5"
