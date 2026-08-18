@@ -23,7 +23,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./Environment/preprod
+        working-directory: ./environments/preprod
 
     steps:
 
@@ -81,7 +81,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./Environment/preprod
+        working-directory: ./environments/preprod
 
     steps:
 
